@@ -49,6 +49,7 @@ namespace gnss_fgo{
         fgo::data_types::GPModelType gpType = fgo::data_types::GPModelType::WNOA;
 
         gtsam::Point3 transIMUToCorrevit = gtsam::Point3(0, 0, 0);
+        gtsam::Point3 transIMUToOdom = gtsam::Point3(0, 0, 0);
         gtsam::Point3 transIMUToReference = gtsam::Point3(0, 0, 0);
 
         gtsam::Rot3 rotIMUToReference = gtsam::Rot3();

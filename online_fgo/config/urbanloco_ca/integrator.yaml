@@ -82,6 +82,13 @@
           noiseModelVelocity: "Cauchy"
           noiseModelPosition: "Cauchy"
 
+          zeroVelocityThreshold: 0.06
+          varScaleRTKFloat: 5.
+          varScaleSingle:   10.
+          varScaleHeadingSingle: 5.
+          varScaleHeadingRTKFloat: 2.
+          varScaleNoSolution: 1000.
+
           NovatelBestposTopic: "/novatel_data/bestpos"
           NovatelBestvelTopic: "/novatel/oem7/bestvel"
           NovatelHeadingTopic: "/novatel/oem7/dualantennaheading"

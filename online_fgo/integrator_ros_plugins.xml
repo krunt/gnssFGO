@@ -43,4 +43,10 @@
         </description>
     </class>
 
+    <class name="SdcOdomIntegrator" type="fgo::integrator::SdcOdomIntegrator" base_class_type="fgo::integrator::IntegratorBase">
+        <description>
+            SdcOdomIntegrator
+        </description>
+    </class>    
+
 </library>

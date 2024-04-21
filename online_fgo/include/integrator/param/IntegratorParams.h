@@ -155,6 +155,12 @@ namespace fgo::integrator::param
     };
     typedef std::shared_ptr<IntegratorCorrevitParams> IntegratorCorrevitParamsPtr;
 
+    struct IntegratorSdcOdomParams : IntegratorBaseParams {
+
+        explicit IntegratorSdcOdomParams(const IntegratorBaseParamsPtr &baseParamPtr) : IntegratorBaseParams(*baseParamPtr){}
+    };
+    typedef std::shared_ptr<IntegratorSdcOdomParams> IntegratorSdcOdomParamsPtr;
+
     struct IntegratorIRTPVAParams : IntegratorBaseParams {
         IntegratorIRTPVAParams() = default;
         explicit IntegratorIRTPVAParams(const IntegratorBaseParamsPtr &baseParamPtr) : IntegratorBaseParams(*baseParamPtr){}

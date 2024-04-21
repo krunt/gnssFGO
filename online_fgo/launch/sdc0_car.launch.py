@@ -16,24 +16,23 @@ def get_params(p):
 def generate_launch_description():
     logger = LaunchConfiguration("log_level")
     share_dir = get_package_share_directory('online_fgo')
-    xacro_path = os.path.join(share_dir, 'config/aachen_lc', 'dienstwagen.urdf.xacro')
 
     config_common_path = LaunchConfiguration('config_common_path')
     default_config_common = os.path.join(
         get_package_share_directory('online_fgo'),
-        'config/aachen_lc',
+        'config/sdc0_car',
         'common.yaml'
     )
 
     default_config_integrator = os.path.join(
         get_package_share_directory('online_fgo'),
-        'config/aachen_lc',
+        'config/sdc0_car',
         'integrator.yaml'
     )
 
     default_config_optimizer = os.path.join(
         get_package_share_directory('online_fgo'),
-        'config/aachen_lc',
+        'config/sdc0_car',
         'optimizer.yaml'
     )
 
@@ -56,7 +55,7 @@ def generate_launch_description():
         package='online_fgo',
         executable='gt_node',
         name="online_fgo",
-        namespace="deutschland",
+        namespace="sdc",
         output='screen',
         emulate_tty=True,
         # prefix=['xterm -e gdb -ex run --args'],
@@ -76,16 +75,6 @@ def generate_launch_description():
         remappings=[
             ('/irt_gpio/novatel/pps', '/irt_gpio_novatel/jetson_pps')
         ]
-    )
-
-    robot_des = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='screen',
-        parameters=[{
-            'robot_description': Command(['xacro', ' ', xacro_path])
-        }]
     )
 
     plot_node = Node(
@@ -114,7 +103,7 @@ def generate_launch_description():
     ld.add_action(declare_config_integrtor_path_cmd)
     ld.add_action(declare_config_optimizer_path_cmd)
     ld.add_action(online_fgo_node)
-    ld.add_action(robot_des)
+    # ld.add_action(robot_des)
     # ld.add_action(plot_node)
 
     return ld

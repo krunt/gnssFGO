@@ -25,6 +25,8 @@
 #include <irt_nav_msgs/msg/gnss_labeling.hpp>
 #include <irt_nav_msgs/msg/pva_geodetic.hpp>
 
+#include <sdc_msgs/msg//gnss_raw_array.hpp>
+
 #include "factor/measurement/gnss/PrDrFactor.h"
 #include "factor/measurement/gnss/PrFactor.h"
 #include "factor/measurement/gnss/DrFactor.h"
@@ -65,6 +67,7 @@ namespace fgo::integrator
         fgo::buffer::CircularDataBuffer<fgo::data_types::GNSSMeasurement> gnssDataBuffer_;
         rclcpp::Subscription<irt_nav_msgs::msg::GNSSObsPreProcessed>::SharedPtr subGNSS_;
         rclcpp::Subscription<irt_nav_msgs::msg::PVAGeodetic>::SharedPtr subPVA_;
+        rclcpp::Subscription<sdc_msgs::msg::GnssRawArray>::SharedPtr subGnssArray_;
 
         rclcpp::Publisher<irt_nav_msgs::msg::GNSSLabeling>::SharedPtr gnssLabelingPub_;
         rclcpp::Publisher<irt_nav_msgs::msg::GNSSLabeling>::SharedPtr gnssLabelingPubRaw_;
@@ -107,10 +110,14 @@ namespace fgo::integrator
 
         void onGNSSMsgCb(irt_nav_msgs::msg::GNSSObsPreProcessed::ConstSharedPtr gnssMeasurement);
 
+        void onGnssArrayMsgCb(sdc_msgs::msg::GnssRawArray::ConstSharedPtr gnssMeasurement);
+
         //we use this function to trigger the factor builder and disconnect the Callback of GNSS and the FactorBuilder
         //when GNSS data comes it just gets saved and trigger checks if new data is there and then builds factor from it
         fgo::data_types::GNSSMeasurement convertGNSSMsg(irt_nav_msgs::msg::GNSSObsPreProcessed::ConstSharedPtr gnssMsg,
                                                         boost::optional<irt_nav_msgs::msg::GNSSLabeling&> satLabels = boost::none);
+
+        fgo::data_types::GNSSMeasurement convertGNSSMsg(sdc_msgs::msg::GnssRawArray::ConstSharedPtr gnssMsg);
 
         inline void extractGNSSObs(const irt_nav_msgs::msg::GNSSObs &gnssObsMsg,
                                    std::vector<fgo::data_types::GNSSObs> &gnssObsVec,

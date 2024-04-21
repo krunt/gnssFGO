@@ -26,6 +26,8 @@
 #include <irt_nav_msgs/msg/sat_label.hpp>
 #include <irt_nav_msgs/msg/gnss_labeling.hpp>
 
+
+
 //fgo
 #include "GNSSFGOLocalizationBase.h"
 #include "sensor/lidar/LIOSAM.h"
@@ -39,6 +41,7 @@ namespace gnss_fgo {
     // ROS Variables
     rclcpp::Subscription<irt_nav_msgs::msg::PPS>::SharedPtr subPPS_;
     rclcpp::Subscription<irt_nav_msgs::msg::PVAGeodetic>::SharedPtr subPVA_;
+    rclcpp::Subscription<sdc_msgs::msg::GnssPosition>::SharedPtr subSdcGnss_;
 
     // tools
     std::unique_ptr<fgo::utils::MeasurementDelayCalculator> PVTDelayCalculator_;
@@ -47,6 +50,8 @@ namespace gnss_fgo {
   protected: //private functions
     //callback for pvtGeodetic (own thread)
     void onPVAMsgCb(irt_nav_msgs::msg::PVAGeodetic::ConstSharedPtr pvtMsg);
+    
+    void onGNSSMsgCb(const sdc_msgs::msg::GnssPosition::ConstSharedPtr pvtMsg);
 
   public:
     /**

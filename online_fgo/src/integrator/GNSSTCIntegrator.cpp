@@ -202,6 +202,12 @@ namespace fgo::integrator
                                                                                                 this, std::placeholders::_1),
                                                                                       subGNSSOpt);
 
+      subGnssArray_ = rosNodePtr_->create_subscription<sdc_msgs::msg::GnssRawArray>("/gnss_raw_array",
+                                                                                      rclcpp::SensorDataQoS(),
+                                                                                      std::bind(&GNSSTCIntegrator::onGnssArrayMsgCb,
+                                                                                                this, std::placeholders::_1),
+                                                                                      rclcpp::SubscriptionOptions());
+
       subPVA_ = rosNodePtr_->create_subscription<irt_nav_msgs::msg::PVAGeodetic>("/irt_gnss_preprocessing/PVT",
                                                                              rclcpp::SensorDataQoS(),
                                                                              std::bind(&GNSSTCIntegrator::onIRTPVTMsgCb,
@@ -634,6 +640,55 @@ namespace fgo::integrator
       return true;
     }
 
+    fgo::data_types::GNSSMeasurement 
+    GNSSTCIntegrator::convertGNSSMsg(sdc_msgs::msg::GnssRawArray::ConstSharedPtr gnssMsg) {
+      const auto thisGNSSTime = rclcpp::Time(gnssMsg->header.stamp.sec, gnssMsg->header.stamp.nanosec, RCL_ROS_TIME);
+      fgo::data_types::GNSSMeasurement gnssMeas;
+
+      gnssMeas.measMainAnt.tow = 0.0;
+      gnssMeas.measMainAnt.timestamp = thisGNSSTime;
+      gnssMeas.measMainAnt.delay = 0.0;
+
+      gnssMeas.measMainAnt.timeOffsetGALGPS = 0.0;
+      gnssMeas.measMainAnt.isGGTOValid = false;
+      gnssMeas.measMainAnt.integrityFlag = 0;
+
+      for (int i = 0; i < gnssMsg->rover_gnss_raws.size(); ++i) {
+        const auto& item = gnssMsg->rover_gnss_raws[i];
+
+        // todo
+        // if (item.freqidx != 0)
+        //   continue;
+
+        fgo::data_types::GNSSObs gnssObs;
+        gnssObs.satId = item.prn_satellites_index;
+        gnssObs.satPos = gtsam::Vector3(item.sat_pos_x, item.sat_pos_y, item.sat_pos_z);
+        gnssObs.satVel = gtsam::Vector3(item.sat_pos_vx, item.sat_pos_vy, item.sat_pos_vz);
+        gnssObs.pr = item.pseudorange - item.err_tropo - item.err_iono;
+
+        // TODO(we/c term)
+        gnssObs.dr = item.sat_clk_drift_err - item.doppler;
+
+        gnssObs.cp = item.carrier_phase;
+        
+        gnssObs.prVar = item.pos_var;
+        gnssObs.prVarRaw = item.pos_var;
+        gnssObs.drVar = item.pos_var; // todo
+        gnssObs.cpVar = item.phase_var;
+        gnssObs.cpVarRaw = item.phase_var;
+        
+        gnssObs.el = item.elevation * fgo::utils::rad2deg;
+        gnssObs.cn0 = item.snr;
+
+        gnssObs.locktime = 0;
+        gnssObs.cycleSlip = false;
+        gnssObs.isLOS = true;
+
+        gnssMeas.measMainAnt.obs.push_back(gnssObs);
+      }
+      return gnssMeas;
+    }
+
     fgo::data_types::GNSSMeasurement
     GNSSTCIntegrator::convertGNSSMsg(irt_nav_msgs::msg::GNSSObsPreProcessed::ConstSharedPtr gnssMsg,
                                      boost::optional<irt_nav_msgs::msg::GNSSLabeling &> satLabel) {
@@ -879,6 +934,14 @@ namespace fgo::integrator
         }
       }
       return gnssMeas;
+    }
+
+    void GNSSTCIntegrator::onGnssArrayMsgCb(sdc_msgs::msg::GnssRawArray::ConstSharedPtr gnssMsg) {
+      const auto thisGNSSTime = rclcpp::Time(gnssMsg->header.stamp.sec, gnssMsg->header.stamp.nanosec, RCL_ROS_TIME);
+
+      fgo::data_types::GNSSMeasurement gnssMeasurement = convertGNSSMsg(gnssMsg);
+
+      gnssDataBuffer_.update_buffer(gnssMeasurement, thisGNSSTime, rosNodePtr_->get_clock()->now());
     }
 
     void GNSSTCIntegrator::onGNSSMsgCb(irt_nav_msgs::msg::GNSSObsPreProcessed::ConstSharedPtr gnssMsg) {

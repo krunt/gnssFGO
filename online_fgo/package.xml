@@ -8,6 +8,7 @@
   <license>apache2</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_interface_packages</buildtool_depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
@@ -17,6 +18,7 @@
   <depend>message_filters</depend>
   <depend>rosidl_default_generators</depend>
   <depend>std_msgs</depend>
+  <depend>sdc_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>visualization_msgs</depend>
@@ -32,12 +34,15 @@
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
   <depend>OpenCV</depend>
+  
   <depend>PCL</depend>
   <depend>ublox_msgs</depend>
   <depend>novatel_oem7_msgs</depend>
   <depend>rosbag2_cpp</depend>
   <depend>rosbag2_storage</depend>
   <depend>rosbag2_storage_default_plugins</depend>
+
+  <member_of_group>rosidl_interface_packages</member_of_group>
 
 
   <test_depend>ament_lint_auto</test_depend>

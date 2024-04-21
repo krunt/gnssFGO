@@ -33,6 +33,7 @@
           useGPPriorFactor: true
           gpType: 'WNOJ'  # 'WNOA'
           useGPInterpolatedFactor: true
+          useEstimatedVarianceAfterInit: true
 
           AutoDiffNormalFactor: true
           AutoDiffGPInterpolatedFactor: true
@@ -42,6 +43,10 @@
           StateMeasSyncUpperBound: 0.02
           StateMeasSyncLowerBound: -0.02
           useConstDriftFactor: false
+
+          noiseModelClockFactor: "huber"
+          robustParamClockFactor: 10.
+          NoOptimizationAfterStates: 0
 
           constDriftStd: 0.5
           constBiasStd: .1
@@ -70,7 +75,8 @@
 
         Optimizer:
           #undefined, BatchFixedLag, IncrementalFixedLag
-          smootherType: 'IncrementalFixedLag'
+          # smootherType: 'IncrementalFixedLag'
+          smootherType: 'BatchFixedLag'
           smootherLag: 3. #marginalization threshhold
           #QcGPWNOJInterpolator: 1000.
           #QcGPWNOJMotionPrior: 10000.

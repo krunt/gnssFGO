@@ -60,6 +60,15 @@ namespace gnss_fgo {
         this->onPVAMsgCb(pvtMsg);
                                                                       },
                                                                       subPVTOpt);
+      
+      subSdcGnss_ = this->create_subscription<sdc_msgs::msg::GnssPosition>("/gnss",
+                                                                      rclcpp::SensorDataQoS(),
+                                                                      [this](const sdc_msgs::msg::GnssPosition::ConstSharedPtr pvtMsg)->void
+                                                                      {
+        this->onGNSSMsgCb(pvtMsg);
+                                                                      },
+                                                                      rclcpp::SubscriptionOptions());
+
 
       // User llh and clock error for gnss preprocessing
       userEstimationPub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("user_estimation",
@@ -77,6 +86,82 @@ namespace gnss_fgo {
                                                         });
 
       RCLCPP_INFO(this->get_logger(), "---------------------  GNSSFGOTimeCentricNode initialized! --------------------- ");
+    }
+    
+    void GNSSFGOTimeCentricNode::onGNSSMsgCb(const sdc_msgs::msg::GnssPosition::ConstSharedPtr pvtMsg)
+    {
+        assert(0);
+
+        // auto thisPVATime = rclcpp::Time(pvtMsg->header.stamp.sec, pvtMsg->header.stamp.nanosec, RCL_ROS_TIME);
+        
+        // fgo::data_types::PVASolution pva;
+        // pva.tow = 0;
+        // pva.llh = (gtsam::Vector3() << pvtMsg->latitude * fgo::constants::deg2rad,
+        //       pvtMsg->longitude * fgo::constants::deg2rad,
+        //       pvtMsg->altitude).finished();
+        // pva.xyz_ecef = fgo::utils::llh2xyz(pva.llh);
+        // pva.nRe = gtsam::Rot3(fgo::utils::nedRe_Matrix_asLLH(pva.llh));
+        // const auto eRn = pva.nRe.inverse();
+        
+        // pva.undulation = 0;
+        // pva.xyz_var = gtsam::Vector3(pvtMsg->position_covariance[0],
+        //                              pvtMsg->position_covariance[4],
+        //                              pvtMsg->position_covariance[8]);
+        // pva.has_heading = false;
+        // pva.heading = fgo::utils::deg2rad * 0;
+        // pva.rot = gtsam::Rot3::Yaw(pva.heading);
+        // pva.rot_ecef = eRn.compose(pva.rot);
+        // pva.cog = 0;
+        // pva.heading_var = std::pow(fgo::utils::deg2rad * 0.1, 2); // in deg^2
+        // pva.has_roll_pitch = false;
+        // pva.roll_pitch = 0.0;
+        // pva.roll_pitch_var = 0.01;
+        // pva.rot_var = gtsam::Vector3(pva.roll_pitch_var, pva.roll_pitch_var, pva.heading_var);
+        // pva.wnc = 0;
+        // pva.error = 0;
+
+        // pva.rot_ecef = gtsam::Rot3::Identity();
+        // pva.rot = gtsam::Rot3::Identity();
+        // pva.rot_var = (gtsam::Vector3() << 0.01, 0.01, 0.01).finished();
+
+        // pva.type = fgo::data_types::GNSSSolutionType::NO_SOLUTION;
+        // switch (pvtMsg->status.status) {
+        // case sensor_msgs::msg::NavSatStatus::STATUS_FIX:
+        //     pva.type = fgo::data_types::GNSSSolutionType::SINGLE;
+        // break;
+        // case sensor_msgs::msg::NavSatStatus::STATUS_SBAS_FIX:
+        //     pva.type = fgo::data_types::GNSSSolutionType::RTKFLOAT;
+        // break;            
+        // case sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX:
+        //     pva.type = fgo::data_types::GNSSSolutionType::RTKFIX;
+        // break;                        
+        // }
+
+        // pva.has_velocity = true;
+        // pva.has_velocity_3D = true;
+        // pva.vel_ecef = (gtsam::Vector3() << pvtMsg->speed[0], pvtMsg->speed[1], pvtMsg->speed[2]).finished();
+        // pva.vel_n = pva.nRe.rotate(pva.vel_ecef);
+        // pva.vel_var = gtsam::Vector3(0.05, 0.05, 0.05);
+
+        // pva.clock_bias = 0;
+        // pva.clock_bias_var = std::pow(0.1, 2);
+        // pva.clock_drift = 0;
+        // pva.clock_drift_var = 0.01;
+
+        // pva.num_sat = 0;
+        // pva.num_sat_used = 0;
+        // pva.num_sat_used_l1 = 0;
+        // pva.num_sat_used_multi = 0;
+        // pva.num_bases = 0;
+        // pva.reference_id = 0;
+        // pva.correction_age = 0;
+        // pva.solution_age = 0;
+
+        // double pvaTimeCorrected = thisPVATime.seconds();
+        // const auto pvaTime = rclcpp::Time(pvaTimeCorrected * fgo::constants::sec2nanosec, RCL_ROS_TIME);
+
+        // pva.timestamp = pvaTime;
+        // pvaSolutionBuffer_.update_buffer(pva, pvaTime);
     }
 
     void GNSSFGOTimeCentricNode::onPVAMsgCb(const irt_nav_msgs::msg::PVAGeodetic::ConstSharedPtr pvaMsg)

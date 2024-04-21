@@ -13,6 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(sdc_msgs_DIR /home/alexey/ros2_ws/install/sdc_msgs/share/sdc_msgs/cmake)
 
 # find ROS2 dependencies
 find_package(ament_cmake REQUIRED)
@@ -46,6 +47,8 @@ find_package(visualization_msgs REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(PCL REQUIRED)
 
+find_package(sdc_msgs REQUIRED)
+
 # find other dependencies
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(GTSAM REQUIRED)
@@ -65,6 +68,10 @@ find_package(GeographicLib REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
 find_package(rosbag2_storage REQUIRED)
 find_package(rosbag2_storage_default_plugins REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+
 
 
 set(AUTO_DIFF ON)
@@ -106,6 +113,7 @@ add_library(${PROJECT_NAME} SHARED
         src/integrator/GNSSTCIntegrator.cpp
         src/integrator/LIOIntegrator.cpp
         src/integrator/CorrevitIntegrator.cpp
+        src/integrator/SdcOdomIntegrator.cpp
         src/solver/FixedLagSmoother.cpp
         src/solver/BatchFixedLagSmoother.cpp
         src/solver/IncrementalFixedLagSmoother.cpp
@@ -140,6 +148,7 @@ ament_target_dependencies(
   "rclcpp_components"
   "rclcpp_lifecycle"
   "std_msgs"
+  "sdc_msgs"
   "sensor_msgs"
   "irt_nav_msgs"
   "message_filters"
@@ -148,7 +157,7 @@ ament_target_dependencies(
   "PCL"
   "novatel_oem7_msgs"
   "ublox_msgs"
-        "rosbag2_cpp"
+  "rosbag2_cpp"
 )
 
 include_directories(${PCL_INCLUDE_DIRS})
@@ -174,6 +183,7 @@ if (${USE_LIOSAM})
           "nav_msgs"
           "sensor_msgs"
           "std_msgs"
+          "sdc_msgs"
           "pluginlib"
           "tf2"
           "tf2_ros"
@@ -216,6 +226,7 @@ set(node_dep_ros
     "yaml_cpp_vendor"
     "rosidl_default_generators"
     "std_msgs"
+    "sdc_msgs"
     "sensor_msgs"
     "irt_nav_msgs"
     "pluginlib"
@@ -294,7 +305,7 @@ ament_target_dependencies(boreas_node
 #idk if this helps us
 
 pluginlib_export_plugin_description_file(${PROJECT_NAME} integrator_ros_plugins.xml)
-ament_export_dependencies(${node_dep_ros})
+ament_export_dependencies(${node_dep_ros} rosidl_default_runtime)
 ament_export_include_directories(include/${PROJECT_NAME} include)
 ament_export_libraries(${PROJECT_NAME})
 

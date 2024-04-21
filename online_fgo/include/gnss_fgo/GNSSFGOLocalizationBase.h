@@ -293,6 +293,12 @@ namespace gnss_fgo
           state_msg.vel.angular.x = state.omega.x();
           state_msg.vel.angular.y = state.omega.y();
           state_msg.vel.angular.z = state.omega.z();
+          state_msg.acc.linear.x = state.accMeasured[3];
+          state_msg.acc.linear.y = state.accMeasured[4];
+          state_msg.acc.linear.z = state.accMeasured[5];
+          state_msg.acc.angular.x = state.accMeasured[0];
+          state_msg.acc.angular.y = state.accMeasured[1];
+          state_msg.acc.angular.z = state.accMeasured[2];
 
           auto fgo_ecef = state.state.position();
           auto fgo_ori  = state.state.attitude();

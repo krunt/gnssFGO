@@ -524,7 +524,7 @@ namespace fgo::graph
                 gravity_b = currentPredState.state.attitude().unrotate(gravity);
             }
 
-            auto currentAcc = (gtsam::Vector6() << currentIMU.accRot,
+            gtsam::Vector6 currentAcc = (gtsam::Vector6() << currentIMU.accRot,
                     currentPredState.imuBias.correctAccelerometer(currentIMU.accLin + gravity_b)).finished();
             //const auto stateAccPair = std::make_pair(nState_, currentAcc);
             stateIDAccMap.push_back(std::make_pair(nState_, currentAcc));
@@ -721,6 +721,8 @@ namespace fgo::graph
       //RCLCPP_INFO_STREAM(this->get_logger(), "State: " << std::fixed << lastOptimizedState_.state);
 
       new_state.imuBias = result.at<gtsam::imuBias::ConstantBias>(B(nState_));
+      // new_state.imuBias = gtsam::imuBias::ConstantBias((gtsam::Vector3() << 0., 0., 0.).finished(),
+                                                                          //  (gtsam::Vector3() << 0.0008835 , -0.00617129,  0.0008835).finished());
       //RCLCPP_INFO_STREAM(this->get_logger(), "Bias: " << lastOptimizedState_.imuBias);
 
 

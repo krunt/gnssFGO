@@ -43,10 +43,13 @@ protected:
     // Data and Data Buffer
     fgo::data_types::State lastlastOptimizedState_;
     rclcpp::Subscription<irt_nav_msgs::msg::PVAGeodetic>::SharedPtr subPVA_;
+    rclcpp::Subscription<sdc_msgs::msg::GnssPosition>::SharedPtr subSdcGnss_;
 
 protected:
     //callback for pvtGeodetic (own thread)
     void onPVAMsgCb(const irt_nav_msgs::msg::PVAGeodetic::ConstSharedPtr& pvtMsg);
+
+    void onGNSSMsgCb(const sdc_msgs::msg::GnssPosition::ConstSharedPtr pvtMsg);
 
 public:
     explicit GNSSFGOGTNode(const rclcpp::NodeOptions &opt);

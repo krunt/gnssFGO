@@ -67,12 +67,16 @@
           rotIMUToLiDAR: [ 1., 0., 0., 0., -1., 0., 0., 0., -1. ]
           transIMUToCorrevit: [ -1.78, 0., 1.2 ]
 
-        Integrators: ["IRTPVALCIntegrator", "UbloxLCIntegrator"]   # ["UbloxLCIntegrator", "CorrevitIntegrator", "GNSSTCIntegrator", "LIOIntegrator"]
+        # Integrators: ["IRTPVALCIntegrator", "UbloxLCIntegrator"]   # ["UbloxLCIntegrator", "CorrevitIntegrator", "GNSSTCIntegrator", "LIOIntegrator"]
         #Integrators: ["IRTPVALCIntegrator"]   # ["UbloxIntegrator", "CorrevitIntegrator", "GNSSTCIntegrator", "LIOIntegrator"]
+        Integrators: ["IRTPVALCIntegrator"] # , "LIOIntegrator"]
+        # Integrators: ["IRTPVALCIntegrator", "LIOIntegrator"]
+        # Integrators: ["LIOIntegrator"]
 
         Optimizer:
           #undefined, BatchFixedLag, IncrementalFixedLag
-          smootherType: 'IncrementalFixedLag'
+          # smootherType: 'IncrementalFixedLag'
+          smootherType: 'BatchFixedLag'
           smootherLag: 3. #marginalization threshold
           #QcGPWNOJInterpolator: 1000.
           #QcGPWNOJMotionPrior: 10000.

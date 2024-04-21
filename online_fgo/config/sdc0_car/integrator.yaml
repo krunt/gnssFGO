@@ -1,0 +1,192 @@
+---
+/sdc/online_fgo:
+    ros__parameters:
+      GNSSFGO:
+        IntegratorBase:
+          StateSensorSyncTimeThreshold: 0.02
+          IMUSensorSyncTimeThreshold: 0.005
+
+        IRTPVALCIntegrator:
+          integratorPlugin: "GNSSLCIntegrator"
+          useForInitialization: true
+          notIntegrating: false
+          useHeaderTimestamp: true
+          GNSSMeasurementFrequency: 5
+          PVTSource: "sdc_gnss"
+          hasHeading: true
+          hasPitch: true
+          hasRoll: true
+          integrateAttitude: true
+          integrateVelocity: true
+          onlyRTKFixed: false
+
+          zeroVelocityThreshold: 0.06
+          varScaleRTKFloat: 2.
+          varScaleSingle:   5.
+          varScaleHeadingSingle: 5.
+          varScaleHeadingRTKFloat: 2.
+          varScaleNoSolution: 1000.
+
+          solutionSyncQueueSize: 10
+          MsgSyncLowerBound: 50000000
+
+          fixedVelVar: 0.05
+          posVarScale: 1.
+          velVarScale: 1.
+          headingVarScale: 1.
+          headingOffsetDeg: 0.
+
+          attitudeFrame: "ecef"
+          attitudeType: "rpy"
+          velocityFrame: "ecef"
+          velocityType: "3d"
+          noiseModelAttitude: "gaussian"
+          noiseModelVelocity: "gaussian"
+          noiseModelPosition: "gaussian"
+          robustParamPos: 0.5
+          robustParamVel: 0.5
+          robustParamAtt: 0.5
+
+        GNSSTCIntegrator:
+          NLOSCSVFilePath: ""
+          integratorPlugin: "GNSSTCIntegrator"
+          GNSSMeasurementFrequency: 10
+          zeroVelocityThreshold: 0.04
+
+          # useForInitialization: false
+          # notIntegrating: true
+          # useHeaderTimestamp: true
+          # hasHeading: false
+          # hasPitch: false
+          # hasRoll: false
+          # integrateAttitude: false
+          # integrateVelocity: false
+
+          delayFromPPS: false
+          useDualAntenna: false
+          useDualAntennaDD: false
+          useRTCMDD: false
+
+          addCBDPriorFactorOnNoGNSS: false
+          usePseudoRangeDoppler: false
+          usePseudoRange: true
+          useDopplerRange: false
+          useDDCarrierPhase: false
+          useDDPseudoRange: false
+          useTDCarrierPhase: false
+
+          pseudorangeUseRawStd: false
+          pseudorangeFactorTil: 0  # 10s
+
+          pseudorangeVarScaleAntMain: 2400. #4800. #3600
+          #pseudorangeVarScaleAntMain: 10. #4800. #3600
+          dopplerrangeVarScaleAntMain: 8.
+          pseudorangeVarScaleAntAux: 2400. #4800. #3600
+          dopplerrangeVarScaleAntAux: 8.
+          carrierStdScale: 1000.
+          carrierphaseStd: 0.1
+
+          thresholdSatNumToCreateTDCP: 3  # > 2
+          ddCPStart: 1.0  #time we wait until we start making DDCP factor
+          initCovforIntAmb: 100.0 #changes kind of nothing
+          weightingModel: "STD"   # STD ELEV SNR
+
+          noiseModelPRDR: 'Cauchy'   # huber Cauchy gemanmcclure
+          noiseModelDDCP: 'Cauchy'   # huber
+          noiseModelTDCP: 'Cauchy'   # huber
+          robustParamPRDR: 0.5
+          robustParamDDCP: 0.5
+          robustParamTDCP: 0.5          
+
+        SdcOdomIntegrator:
+          integratorPlugin: "SdcOdomIntegrator"
+          noiseModelVelocity: "gaussian"
+          robustParamVel: 0.5
+          nearZeroVelocityThreshold: 0.04
+          velocityFrame: "body"
+
+        LIOIntegrator:
+          notIntegrating: true
+          integratorPlugin: "LIOIntegrator"
+          pointCloudTopic: "/velodyne_points"
+          lidarFrame: "velodyne"
+          baselinkFrame: "base_link"
+          odometryFrame: "odom"
+          mapFrame: "map"
+          savePCD: false
+          savePCDDirectory: ""
+
+          integrateBetweenPose: true
+          integrateGlobalPose: false
+          odomPoseVar: [0.5, 0.5, 0.5, 1., 1., 1.]
+          noiseModelOdomPose: "Cauchy"
+          robustParamOdomPose: 0.5
+
+          N_SCAN: 16
+          Horizon_SCAN: 1800
+          downsampleRate: 1
+          lidarMinRange: 3.
+          lidarMaxRange: 1000.
+          maxPosePriorLiDARMsgAging: 0.1
+          edgeFeatureMinValidNum: 10
+          surfFeatureMinValidNum: 100
+          numberOfCores: 8
+          mappingProcessInterval: 0.15
+          varianceRoll: 0.16
+          variancePitch: 0.16
+          varianceYaw: 0.25
+          varianceX: 0.054
+          varianceY: 0.054
+          varianceZ: 0.09
+
+          surroundingKeyframeSearchRadius: 50.
+          loopClosureEnableFlag: true
+          loopClosureFrequency: 1.
+          surroundingKeyframeSize: 50
+          historyKeyframeSearchRadius: 15.
+          historyKeyframeSearchTimeDiff: 30.
+          historyKeyframeSearchNum: 30
+          historyKeyframeFitnessScore: 0.3
+          globalMapVisualizationSearchRadius: 1000.
+          globalMapVisualizationPoseDensity: 10.
+          globalMapVisualizationLeafSize: 1.
+          imuRPYWeight: 0.01
+          z_tollerance: 1000.
+          rotation_tollerance: 1000.
+          mappingCornerLeafSize: 0.2
+          mappingSurfLeafSize: 0.4
+          surroundingkeyframeAddingDistThreshold: 0.2
+          surroundingkeyframeAddingAngleThreshold: 0.2
+          surroundingKeyframeDensity: 2.0
+
+          maxNumCachedMap: 1000000
+          maxPointAge: 10.
+          scan2MapOptIteration: 30
+          minSizeCurrentKeyframeCloud: 300
+          minSizePreviousKeyframeCloud: 1000
+          icpMaxIterations: 100
+          icpTransformEpsilon: 1e-6
+          icpEuclideanFitnessEpsilon: 1e-6
+          icpRANSACIterations: 0
+          freqLoopDetectionInSec: 5
+          freqVisualizationInSec: 5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

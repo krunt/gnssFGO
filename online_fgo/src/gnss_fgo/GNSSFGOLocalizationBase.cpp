@@ -266,6 +266,7 @@ namespace gnss_fgo
             if(refSensorTimestamps.empty() || !pvaSolutionBuffer_.size()) {
                 lastInitFinished_ = true;
                 triggeredInit_ = false;
+                RCLCPP_INFO(this->get_logger(), "initializeFGO () empty buffer");
                 continue;
             }
 
@@ -323,13 +324,19 @@ namespace gnss_fgo
                 lastOptimizedState_.imuBias = gtsam::imuBias::ConstantBias((gtsam::Vector3() << 0., 0., 0.).finished(),
                                                                            (gtsam::Vector3() << gyroBias[0], gyroBias[1], gyroBias[2]).finished());
             }
+
+            // {
+            //     lastOptimizedState_.imuBias = gtsam::imuBias::ConstantBias((gtsam::Vector3() << 0., 0., 0.).finished(),
+            //                                                                (gtsam::Vector3() << 0.0008835 , -0.00617129,  0.0008835).finished());
+            // }
+            
             lastOptimizedState_.cbd = (gtsam::Vector2() << foundPVA.clock_bias, foundPVA.clock_drift).finished();
             std::cout << std::fixed << "init_cbd: " << lastOptimizedState_.cbd << std::endl;
 
             //initialization
 
             const auto init_imu_pos = foundPVA.xyz_ecef - foundPVA.rot_ecef.rotate(paramsPtr_->transIMUToReference);
-            const auto vecGrav = /*init_nedRe * */fgo::utils::gravity_ecef(init_imu_pos);
+            auto vecGrav = /*init_nedRe * */fgo::utils::gravity_ecef(init_imu_pos);
             const auto gravity_b = foundPVA.rot_ecef.unrotate(vecGrav);
             lastOptimizedState_.omega = this_imu.gyro;
             lastOptimizedState_.accMeasured = (gtsam::Vector6() << this_imu.accRot, this_imu.accLin + gravity_b).finished();
@@ -419,7 +426,7 @@ namespace gnss_fgo
         fgo::data_types::IMUMeasurement fgoIMUMeasurement;
         fgoIMUMeasurement.timestamp = ts; //timestamp
 
-        fgoIMUMeasurement.accLin = (gtsam::Vector3() << imuMeasurement->linear_acceleration.x, imuMeasurement->linear_acceleration.y, imuMeasurement->linear_acceleration.z).finished(); //acc
+        fgoIMUMeasurement.accLin = (gtsam::Vector3() << imuMeasurement->linear_acceleration.x, imuMeasurement->linear_acceleration.y, imuMeasurement->linear_acceleration.z).finished();
         fgoIMUMeasurement.accLin = paramsPtr_->imuRot.rotate(fgoIMUMeasurement.accLin);
         fgoIMUMeasurement.accLinCov = gtsam::Vector9(imuMeasurement->angular_velocity_covariance.data());
         fgoIMUMeasurement.gyro = (gtsam::Vector3() << imuMeasurement->angular_velocity.x, imuMeasurement->angular_velocity.y, imuMeasurement->angular_velocity.z).finished(); //angular vel

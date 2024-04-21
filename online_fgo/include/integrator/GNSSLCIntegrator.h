@@ -26,9 +26,12 @@
 #include <irt_nav_msgs/msg/fgo_state.hpp>
 
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
+#include <sensor_msgs/msg/nav_sat_status.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <ublox_msgs/msg/nav_pvt.hpp>
 #include <ublox_msgs/msg/nav_clock.hpp>
+
+#include <sdc_msgs/msg/gnss_position.hpp>
 
 #include <novatel_oem7_msgs/msg/bestpos.hpp>
 #include <novatel_oem7_msgs/msg/bestvel.hpp>
@@ -65,6 +68,8 @@ namespace fgo::integrator
         fgo::buffer::CircularDataBuffer<fgo::data_types::PVASolution> referencePVTBuffer_;
 
         rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr subNavfix_;
+
+        rclcpp::Subscription<sdc_msgs::msg::GnssPosition>::SharedPtr subSdcGnss_;
 
         typedef message_filters::sync_policies::ApproximateTime<novatel_oem7_msgs::msg::BESTPOS, novatel_oem7_msgs::msg::BESTVEL,
                                                                 novatel_oem7_msgs::msg::DUALANTENNAHEADING> OEM7DualAntennaSyncPolicy;
@@ -136,7 +141,8 @@ namespace fgo::integrator
 
         bool checkHasMeasurements() override
         {
-          return referencePVTBuffer_.size() != 0;
+          // return referencePVTBuffer_.size() != 0;
+          return GNSSPVABuffer_.size() != 0;
         }
 
 
@@ -666,16 +672,74 @@ namespace fgo::integrator
           sol.type =  data_types::GNSSSolutionType::SINGLE;
           GNSSPVABuffer_.update_buffer(sol, msg_timestamp);
 
-
-
           if (paramPtr_->useForInitialization && !graphPtr_->isGraphInitialized()) {
             graphPtr_->updateReferenceMeasurementTimestamp(sol.tow, msg_timestamp);
             RCLCPP_WARN(rosNodePtr_->get_logger(), "onNavFixMsgCb: graph not initialized, waiting ...");
           }
         }
 
+        void onSdcGnssCb(const sdc_msgs::msg::GnssPosition::ConstSharedPtr msg)
+        {
+          rclcpp::Time msg_timestamp;
+          if(paramPtr_->useHeaderTimestamp)
+            msg_timestamp = rclcpp::Time(msg->header.stamp.sec, msg->header.stamp.nanosec, RCL_ROS_TIME);
+          else
+            msg_timestamp = rclcpp::Time(rosNodePtr_->now(), RCL_ROS_TIME);
+          fgo::data_types::PVASolution sol{};
+          sol.tow = 0;
+          sol.timestamp = msg_timestamp;
+          sol.llh = (gtsam::Vector3() << msg->latitude * fgo::constants::deg2rad,
+              msg->longitude * fgo::constants::deg2rad,
+              msg->altitude).finished();
+          sol.xyz_ecef = fgo::utils::llh2xyz(sol.llh);
+          sol.xyz_var =  (gtsam::Vector3() << 0.01, 0.01, 0.01).finished();
+          
+          const auto eRenu = gtsam::Rot3(fgo::utils::enuRe_Matrix_asLLH(sol.llh)).inverse();
 
+          sol.rot = gtsam::Rot3::Quaternion(msg->orientation[3],
+                                            msg->orientation[0],
+                                            msg->orientation[1],
+                                            msg->orientation[2]);
+          sol.rot_ecef = eRenu.compose(sol.rot);
+          sol.rot_var = (gtsam::Vector3() << 0.01, 0.01, 0.01).finished();
 
+          auto vel_body = (gtsam::Vector3() << msg->velocity[0], msg->velocity[1], msg->velocity[2]).finished();
+          sol.vel_n = sol.rot.rotate(vel_body);
+          sol.vel_ecef = eRenu.rotate(sol.vel_n);                                      
+          sol.vel_var =  (gtsam::Vector3() << 0.05, 0.05, 0.05).finished();
+
+          
+          sol.has_heading = true;
+          sol.has_roll_pitch = true;
+          sol.has_velocity_3D = true;
+          sol.has_velocity = true;
+
+          sol.type = data_types::GNSSSolutionType::NO_SOLUTION;
+          switch (msg->status.status) {
+            case sensor_msgs::msg::NavSatStatus::STATUS_FIX:
+              sol.type = data_types::GNSSSolutionType::SINGLE;
+            break;
+            case sensor_msgs::msg::NavSatStatus::STATUS_SBAS_FIX:
+              sol.type = data_types::GNSSSolutionType::RTKFLOAT;
+            break;            
+            case sensor_msgs::msg::NavSatStatus::STATUS_GBAS_FIX:
+              sol.type = data_types::GNSSSolutionType::RTKFIX;
+            break;                        
+          }
+
+          // if (sol.type == data_types::GNSSSolutionType::SINGLE)
+          //   return;
+          if (sol.type == data_types::GNSSSolutionType::NO_SOLUTION)
+            return;
+
+          
+          GNSSPVABuffer_.update_buffer(sol, msg_timestamp);
+
+          if (paramPtr_->useForInitialization && !graphPtr_->isGraphInitialized()) {
+            graphPtr_->updateReferenceMeasurementTimestamp(sol.tow, msg_timestamp);
+            RCLCPP_WARN(rosNodePtr_->get_logger(), "onSdcGnssCb: graph not initialized, waiting ...");
+          }
+        }
     };
 
 }

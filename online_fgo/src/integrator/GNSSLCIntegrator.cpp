@@ -234,6 +234,16 @@ namespace fgo::integrator
                                                                                    std::bind(&GNSSLCIntegrator::onNavFixMsgCb, this, std::placeholders::_1));
 
       }
+      else if(PVTSource.value() == "sdc_gnss")
+      {
+        RCLCPP_INFO_STREAM(rosNodePtr_->get_logger(), integratorName_ +": using gnss ...");
+        RosParameter<std::string> navSdcGnssTopic("GNSSFGO." + integratorName_ + ".sdcGnssTopic", "/gnss", node);
+
+        subSdcGnss_ = rosNodePtr_->create_subscription<sdc_msgs::msg::GnssPosition>(navSdcGnssTopic.value(),
+                                                                                    rclcpp::SystemDefaultsQoS(),
+                                                                                    std::bind(&GNSSLCIntegrator::onSdcGnssCb, this, std::placeholders::_1));
+
+      }      
       else if(PVTSource.value() == "span")
       {
         RCLCPP_INFO_STREAM(rosNodePtr_->get_logger(), integratorName_ +": using span with velocity and heading ...");
@@ -470,7 +480,9 @@ namespace fgo::integrator
           }
           else
           {
-            RCLCPP_INFO_STREAM(rosNodePtr_->get_logger(), "Integrating GNSS positioning ...");
+            RCLCPP_INFO_STREAM(rosNodePtr_->get_logger(), "Integrating GNSS positioning ... xyz=" 
+              << pvaIter->xyz_ecef[0] << ", " << pvaIter->xyz_ecef[1] << ", " << pvaIter->xyz_ecef[2] << "; xyz_var="
+              << pvaIter->xyz_var[0] * posVarScale << ", " << pvaIter->xyz_var[1] * posVarScale << ", " << pvaIter->xyz_var[2] * posVarScale);
             this->addGNSSFactor(pose_key_sync, pvaIter->xyz_ecef, pvaIter->xyz_var * posVarScale, paramPtr_->transIMUToAnt1);
           }
 

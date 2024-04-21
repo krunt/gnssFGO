@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  Author: Haoming Zhang (h.zhang@irt.rwth-aachen.de)
+//  Author: Kuts Alexey
 //
 //
 
@@ -327,7 +327,7 @@ namespace fgo::integrator
           //RCLCPP_WARN_STREAM(appPtr_->get_logger(),
          //                    "[Correvit] Integrating of  " << last_key_index);
           this->addNavVelocityFactor(pose_key_sync, vel_key_sync, vel, fixedVelVar, this_gyro_unbiased,
-                                     paramPtr_->transIMUToCorrevit, paramPtr_->velocityType);
+                                     paramPtr_->transIMUToOdom, paramPtr_->velocityType);
 
         }
 /*
